@@ -4,7 +4,7 @@ RUN mkdir /usr/src/api/src
 ENV FLASK_APP=api.py
 COPY . /usr/src/app/
 WORKDIR /usr/src/app/src
-RUN apk update && apk add --virtual build-deps gcc python3-dev musl-dev libffi-dev build-base && apk add postgresql-dev
+RUN apk update && apk add --virtual build-deps gcc python3-dev musl-dev libffi-dev build-base && apk add postgresql-devp && apk add openssl-dev cargo
 RUN pip install -r ../requirements.txt
 ENTRYPOINT ["python"]
 CMD ["api.py"]
