@@ -47,15 +47,6 @@ def token_required(f):
     return decorated 
 
 
-@app.route("/")
-@token_required
-def home(decoded_token):
-    user = User.query.filter_by(public_id=decoded_token['public_id']).first()
-    json_posts = []
-    for post in user.posts:
-        json_posts.append(post.toDict())
-    return jsonify(json_posts)
-
 @app.route("/user/signup", methods=['POST'])
 def signup():
     request_data = request.get_json()
