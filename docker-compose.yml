@@ -11,7 +11,7 @@ services:
       - "5432:5432"
     volumes:
       - ./db_data/postgres-data:/var/lib/postgresql/data
-    
+      
 
   python-flask:
     build: .
@@ -20,4 +20,6 @@ services:
       - "5000:5000"
     volumes:
       - ./src:/usr/src/app/src
+    command: bash -c "flask db migrate && flask db upgrade"
+    
     
