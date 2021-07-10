@@ -52,6 +52,7 @@ def signup():
     request_data = request.get_json()
     return jsonify(auth_service.signup(request_data['email'], request_data['name'], request_data['password'])), 201
 
+
 @app.route("/user/login")
 def login():
     auth = request.authorization
@@ -104,27 +105,25 @@ def post_create(decoded_token):
         return jsonify({"error":str(e)})
 
 
-@app.route("/post/like", methods=['PUT'])
+@app.route("/post/<post_id>/like", methods=['PUT'])
 @token_required
 def post_like(decoded_token):
-    request_data = request.get_json()
-    new_like = Like(user_public_id=decoded_token['public_id'], post_id=request_data['post_id'], date=datetime.datetime.now())
+    new_like = Like(user_public_id=decoded_token['public_id'], post_id=post_id, date=datetime.datetime.now())
     try:
         db.session.add(new_like)
         db.session.commit()
         return jsonify({"message":"ok"}), 201
     except IntegrityError as e:
         assert isinstance(e.orig, UniqueViolation)
-        return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {request_data['post_id']}"})
+        return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {post_id}"})
     except Exception as e:
         return jsonify({"error":str(e)})
 
 
-@app.route("/post/unlike", methods=['DELETE'])
+@app.route("/post/<post_id>/unlike", methods=['DELETE'])
 @token_required
 def post_unlike(decoded_token):
-    request_data = request.get_json()
-    unlike = Like.query.filter_by(user_public_id=decoded_token['public_id'], post_id=request_data['post_id']).first()
+    unlike = Like.query.filter_by(user_public_id=decoded_token['public_id'], post_id=post_id).first()
     if not unlike:
         return jsonify({"error":"User didn't like the post"})
     try:
@@ -135,12 +134,12 @@ def post_unlike(decoded_token):
         return jsonify({"error":str(e)})
 
 
-@app.route("/post/analytics/<id>")
+@app.route("/post/<post_id>/analytics")
 def post_analytics(id):
     try:
         date_from = datetime.datetime.fromisoformat(request.args['date_from'])
         date_to = datetime.datetime.fromisoformat(request.args['date_to'])
-        post = Post.query.filter_by(id=id).first()
+        post = Post.query.filter_by(id=post_id).first()
         if post == None:
             return jsonify({"error":f"Invalid post id! Post with id {id} doesn't exit!"}), 401
         if post.creation_date > date_to:
