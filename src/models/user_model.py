@@ -1,4 +1,4 @@
-from api import db
+from .db import db
 from sqlalchemy import inspect
 import datetime
 import uuid

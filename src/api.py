@@ -1,32 +1,28 @@
+from functools import wraps
+import datetime
+import jwt
+
 from flask import Flask, jsonify, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from sqlalchemy.exc import IntegrityError
-import datetime
-import jwt
-from functools import wraps
 from psycopg2.errors import UniqueViolation
+
+from models.db import db
+from models.user_model import User
+from models.post_model import Post, Like
 
 def create_app(config_filename):
     app = Flask(__name__)
-    app.config.from_pyfile(config_filename)
+    app.config.from_object(config_filename)
 
-    from models import db
-    db.init_db(app)
+    from models.db import db
+    db.init_app(app)
 
+    return app
+    
+app = create_app("config.DevelopmentConfig")
 
-    return app, db
-app = Flask(__name__)
-# app, db = create_app("config.py")
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config["SQLALCHEMY_ECHO"] = True
-app.config.from_object("config.DevelopmentConfig")
-
-db = SQLAlchemy(app)
-
-from models.user_model import *
-from models.post_model import *
-# from models import post_model, user_model
 migrate = Migrate(app, db)
 
 
