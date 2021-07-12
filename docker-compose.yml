@@ -19,5 +19,5 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - ./blog_api:/usr/src/app/blog_api    
+      - .:/usr/src/api    
     

@@ -4,7 +4,7 @@ import bcrypt
 from blog_api.models.user_model import User
 from blog_api.models.post_model import Post, Like
 from blog_api.models.db import db
-from init_app import create_app
+from blog_api.create_app import create_app
 
 @pytest.fixture
 def input_value():
