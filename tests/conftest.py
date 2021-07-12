@@ -1,9 +1,9 @@
 import pytest
 import uuid
 import bcrypt
-from src.models.user_model import User
-from src.models.post_model import Post, Like
-from src.models.db import db
+from blog_api.models.user_model import User
+from blog_api.models.post_model import Post, Like
+from blog_api.models.db import db
 from init_app import create_app
 
 @pytest.fixture
@@ -19,7 +19,7 @@ def new_user():
 
 @pytest.fixture()
 def app():
-    app = create_app('src.config.TestingConfig')
+    app = create_app('blog_api.config.TestingConfig')
  
     # testing_client = app.test_client()
  
