@@ -16,7 +16,6 @@ def create_app(config_filename):
     app = Flask(__name__)
     app.config.from_object(config_filename)
 
-    from models.db import db
     db.init_app(app)
 
     return app
@@ -155,6 +154,10 @@ def post_analytics(id):
         return jsonify({"error":"Incorrect date format: "+str(e)}), 400
     return jsonify({"date_from":date_from,"date_to":date_to})
 
+
+@app.route("/")
+def home():
+    return jsonify({"message":"ok"})
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0')

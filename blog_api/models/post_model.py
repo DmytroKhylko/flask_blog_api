@@ -23,3 +23,6 @@ class Like(db.Model):
     post_id = db.Column(db.Integer(), db.ForeignKey("posts.id"), nullable=False)
     date = db.Column(db.DateTime())
     db.UniqueConstraint(user_public_id, post_id)
+
+    def toDict(self):
+        return { c.key: getattr(self, c.key) for c in inspect(self).mapper.column_attrs }
