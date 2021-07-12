@@ -14,17 +14,6 @@ from blog_api.models.db import db
 from blog_api.models.user_model import User
 from blog_api.models.post_model import Post, Like
 
-# def create_app(config_filename):
-#     app = Flask(__name__)
-#     app.config.from_object(config_filename)
-
-#     db.init_app(app)
-
-#     return app
-    
-# app = create_app("config.DevelopmentConfig")
-
-# migrate = Migrate(current_app, db)
 
 bp = Blueprint("index", __name__, url_prefix="/")
 
@@ -56,6 +45,8 @@ def token_required(f):
 @bp.route("/user/signup", methods=("POST",))
 def signup():
     request_data = request.get_json()
+    if not request_data['email'] or not request_data['name'] or not request_data['password']:
+        return jsonify({"error":"Not enough user info was given!"}), 400
     if User.user_in_db_by_email(request_data['email']):
         return jsonify({"error":f"User with email {request_data['email']} already exists"})
 
@@ -69,11 +60,11 @@ def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return jsonify({"error":"Could not verify"}), 401
+        return jsonify({"error":"Could not verify"}), 400
 
     user = User.query.filter_by(email=auth.username).first()
     if not user:
-        return jsonify({"error":"Could not verify"}), 401
+        return jsonify({"error":"Could not verify"}), 400
 
     try:
         if User.check_user_password(auth.password.encode('utf-8'), user.password.encode('utf-8')):
@@ -83,7 +74,7 @@ def login():
     except ValueError as e:
         return jsonify({"error":str(e)})
 
-    return jsonify({"error":"Could not verify"}), 401
+    return jsonify({"error":"Could not verify"}), 400
 
 
 # @app.route("/user/<public_id>/last-activity")
@@ -119,7 +110,7 @@ def post_like(decoded_token, id):
         db.session.add(new_like)
         db.session.commit()
         return jsonify({"message":"ok"}), 201
-    except IntegrityError as e:
+    except IntegrityError:
         return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {id}"}), 400
 
 
