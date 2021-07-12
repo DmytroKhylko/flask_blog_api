@@ -9,11 +9,10 @@ from flask import current_app
 from flask import Blueprint
 
 from sqlalchemy.exc import IntegrityError
-from psycopg2.errors import UniqueViolation
 
-from models.db import db
-from models.user_model import User
-from models.post_model import Post, Like
+from blog_api.models.db import db
+from blog_api.models.user_model import User
+from blog_api.models.post_model import Post, Like
 
 # def create_app(config_filename):
 #     app = Flask(__name__)
@@ -44,10 +43,9 @@ def token_required(f):
         try:
             decoded_token = jwt.decode(token, current_app.config['SECRET_KEY'], algorithms="HS256")
 
-        except InvalidSignatureError as e :
+        except (InvalidSignatureError, ExpiredSignatureError) as e :
             return jsonify({"error":"Invalid token! "+str(e)}), 401
-        except ExpiredSignatureError as e :
-            return jsonify({"error":"Invalid token! "+str(e)}), 401
+
         User.log_last_request(decoded_token) 
 
         return f(decoded_token, *args, **kwargs)
@@ -122,7 +120,6 @@ def post_like(decoded_token, id):
         db.session.commit()
         return jsonify({"message":"ok"}), 201
     except IntegrityError as e:
-        assert isinstance(e.orig, UniqueViolation)
         return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {id}"}), 400
 
 
