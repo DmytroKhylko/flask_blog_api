@@ -11,11 +11,20 @@ services:
       - "5432:5432"
     volumes:
       - ./db_data/postgres-data:/var/lib/postgresql/data
+  db-test:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5433:5432"
       
 
   python-flask:
     build: .
     restart: always
+    env_file: 
+      - .env
     ports:
       - "5000:5000"
     volumes:

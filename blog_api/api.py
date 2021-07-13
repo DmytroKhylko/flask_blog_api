@@ -130,7 +130,7 @@ def post_analytics(id):
         date_from = datetime.datetime.fromisoformat(request.args['date_from'])
         date_to = datetime.datetime.fromisoformat(request.args['date_to'])
         post = Post.query.filter_by(id=id).first()
-        if post == None:
+        if post is None:
             return jsonify({"error":f"Invalid post id! Post with id {id} doesn't exit!"}), 400
         if post.creation_date > date_to:
             return jsonify({"error":f"Invalid date_to param! Post with id {id} hasn't been created yet"})
