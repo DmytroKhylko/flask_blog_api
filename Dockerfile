@@ -5,4 +5,4 @@ ENV FLASK_APP=blog_api.create_app:create_app
 COPY . /usr/src/api/
 WORKDIR /usr/src/api
 RUN pip install -r requirements.txt
-CMD chmod +x ./init.sh && ./init.sh
+CMD chmod +x ./init.sh && chmod +x ./wait-for-it.sh && ./wait-for-it.sh db:5432 -- ./init.sh
