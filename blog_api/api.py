@@ -41,7 +41,6 @@ def token_required(f):
     return decorated 
 
 
-# @app.route("/user/signup", methods=['POST'])
 @bp.route("/user/signup", methods=("POST",))
 def signup():
     request_data = request.get_json()
@@ -54,17 +53,16 @@ def signup():
     return jsonify({"new_user_pulic_id":new_user_pulic_id['public_id']}), 201
 
 
-# @app.route("/user/login")
 @bp.route("/user/login", methods=("GET",))
 def login():
     auth = request.authorization
 
     if not auth or not auth.username or not auth.password:
-        return jsonify({"error":"Could not verify"}), 400
+        return jsonify({"error":"Could not verify"}), 401
 
     user = User.query.filter_by(email=auth.username).first()
     if not user:
-        return jsonify({"error":"Could not verify"}), 400
+        return jsonify({"error":"Could not verify"}), 401
 
     try:
         if User.check_user_password(auth.password.encode('utf-8'), user.password.encode('utf-8')):
@@ -72,12 +70,11 @@ def login():
             User.log_last_login(user.id)
             return jsonify({"token":token})
     except ValueError as e:
-        return jsonify({"error":str(e)})
+        return jsonify({"error":str(e)}), 401
 
-    return jsonify({"error":"Could not verify"}), 400
+    return jsonify({"error":"Could not verify"}), 401
 
 
-# @app.route("/user/<public_id>/last-activity")
 @bp.route("/user/<public_id>/last-activity", methods=("GET",))
 def last_login(public_id):
     
@@ -89,7 +86,6 @@ def last_login(public_id):
                     "last_request":user.last_request})
 
 
-# @app.route("/post/create", methods=['POST'])
 @bp.route("/post/create", methods=("POST",))
 @token_required
 def post_create(decoded_token):
@@ -103,7 +99,6 @@ def post_create(decoded_token):
     return jsonify({"new_post_id":new_post.id}), 201
 
 
-# @app.route("/post/<int:id>/like", methods=['PUT'])
 @bp.route("post/<int:id>/like", methods=("PUT",))
 @token_required
 def post_like(decoded_token, id):
@@ -116,7 +111,6 @@ def post_like(decoded_token, id):
         return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {id}"}), 400
 
 
-# @app.route("/post/<int:id>/unlike", methods=['PUT'])
 @bp.route("/post/<int:id>/unlike", methods=("PUT",))
 @token_required
 def post_unlike(decoded_token, id):
@@ -130,7 +124,6 @@ def post_unlike(decoded_token, id):
 
 
 
-# @app.route("/post/<int:id>/analytics")
 @bp.route("/post/<int:id>/analytics", methods=("GET",))
 def post_analytics(id):
     try:
@@ -148,12 +141,3 @@ def post_analytics(id):
     except ValueError as e:
         return jsonify({"error":"Incorrect date format: "+str(e)}), 400
     return jsonify({"date_from":date_from,"date_to":date_to})
-
-
-# @app.route("/")
-@bp.route("/")
-def home():
-    return jsonify({"message":"ok"})
-
-# if __name__ == "__main__":
-#     app.run(host='0.0.0.0')

@@ -17,33 +17,20 @@ def input_value():
 @pytest.fixture()
 def app():
     app = create_app('blog_api.config.TestingConfig')
- 
-    # testing_client = app.test_client()
- 
-    # ctx = app.app_context()
-    # ctx.push()
- 
     yield app 
  
-    # ctx.pop()
-
 
 @pytest.fixture
 def client(app):
     with app.app_context():
-
         yield app.test_client()
 
 
 
 @pytest.fixture()
 def init_database():
-    # db.create_all()
- 
     yield db
  
-    # db.drop_all()
-
 
 @pytest.fixture
 def new_user():

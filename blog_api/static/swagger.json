@@ -1,0 +1,340 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "version": "1.0.0",
+        "title": "Flask Blog API"
+    },
+    "tags": [
+        {
+            "name": "API requests"
+        }
+    ],
+    "paths": {
+        "/user/login": {
+            "get": {
+                "tags": [
+                    "User Request"
+                ],
+                "security": {
+                    "$ref": "#/components/securityShemas/basicAuth"
+                },
+                "summary": "Returns user_token",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref":"#/components/schemas/JWT_token"
+                                },
+                                "examples":{
+                                    "user_token":{
+                                        "user_token":"JWT valid token"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description":"Authentication information is missing or invalid"
+                    }
+                }
+            }
+        },
+        "/user/signup":{
+            "post": {
+                "tags": [
+                    "User Request"
+                ],
+                "summary": "Create a new user",
+                "requestBody": {
+                    "description": "User signup body",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/userSignupBody"
+                            }
+                        }
+                    }
+                },
+                "produces": [
+                    "application/json"
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/components/schemas/userPublicId"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post data."
+                    }
+                }
+            }
+        },
+        "/user/{public_id}/last-activity": {
+            "get": {
+                "tags": [
+                    "User Request"
+                ],
+                "summary": "Get activity for user by public ID",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "public_id",
+                        "required": true,
+                        "description": "User public ID",
+                        "schema": {
+                            "$ref": "#/components/schemas/userPublicId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref":"#/components/schemas/userLastActivity"
+                                },
+                                "examples":{
+                                    "example":{
+                                        "last_login":"ISO date",
+                                        "last_request":"ISO date"
+                                    }
+                                }
+                            }
+                        },
+                        "schema": {
+                            "$ref": "#/components/schemas/userLastActivity"
+                        }
+                    },
+                    "400": {
+                        "description": "User with such public id not found"
+                    }
+                }
+            }
+        },
+        "/post/create":{
+            "post": {
+                "summary": "Create new post",
+                "tags": [
+                    "Blog Post Request"
+                ],
+                "security": [
+                    {
+                    "bearerAuth":[]
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "OK",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref":"#/components/schemas/postId"
+                                },
+                                "examples":{
+                                    "example":{
+                                        "post_id":"1"
+                                    }
+                                }
+                            }
+                        },
+                        "schema": {
+                            "$ref": "#/components/schemas/postId"
+                        }
+                    },
+                    "400": {
+                        "description": "Failed. Bad post data."
+                    }
+                }
+            }
+        },
+        "/post/{id}/like":{
+            "put": {
+                "summary": "Like post by ID",
+                "tags": [
+                    "Blog Post Request"
+                ],
+                "security": [
+                    {
+                    "bearerAuth":[]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "description": "Post ID",
+                        "schema": {
+                            "$ref": "#/components/schemas/postId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    },
+                    "400": {
+                        "description": "Failed. User already liked post"
+                    }
+                }
+            }
+        },
+        "/post/{id}/unlike":{
+            "put": {
+                "summary": "Unike post by ID",
+                "tags": [
+                    "Blog Post Request"
+                ],
+                "security": [
+                    {
+                    "bearerAuth":[]
+                    }
+                ],
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "id",
+                        "required": true,
+                        "description": "Post ID",
+                        "schema": {
+                            "$ref": "#/components/schemas/postId"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    },
+                    "400": {
+                        "description": "Failed. User didn't like post"
+                    }
+                }
+            }
+        }
+        ,
+        "/post/{id}/analytics":{
+            "get": {
+                "summary": "Get post like analytics by ID",
+                "tags": [
+                    "Blog Post Request"
+                ],
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "date_from",
+                        "required": true,
+                        "description": "ISO date",
+                        "schema": {
+                            "$ref": "#/components/schemas/dateFrom"
+                        }
+                    },
+                    {
+                        "in": "query",
+                        "name": "date_to",
+                        "required": true,
+                        "description": "ISO date",
+                        "schema": {
+                            "$ref": "#/components/schemas/dateTo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok"
+                    },
+                    "400": {
+                        "description": "Failed. Incorrect data"
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "responses": {
+            "UnauthorizedError": {
+                "description": "Authentication information is missing or invalid",
+                "headers": {
+                    "WWW_Authenticate": {
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "securityShemas": {
+            "basicAuth": {
+                "type": "http",
+                "scheme": "basic"
+            },
+            "bearerAuth": {
+                "type": "http",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        },
+        "schemas": {
+            "userPublicId":{
+                "properties":{
+                    "public_id":{
+                        "type":"string"
+                    }
+                }
+            },
+            "userSignupBody":{
+                "properties":{
+                    "email":{
+                        "type":"string"
+                    },
+                    "name":{
+                        "type":"string"
+                    }
+                }
+            },
+            "JWT_token": {
+                "properties": {
+                    "user_token": {
+                        "type": "string"
+                    }
+                }
+            },
+            "userLastActivity":{
+                "properties": {
+                    "last_login": {
+                        "type": "string"
+                    },
+                    "last_request": {
+                        "type": "string"
+                    }
+                }
+            },
+            "postId":{
+                "properties":{
+                    "new_post_id":{
+                        "type":"string"
+                    }
+                }
+            },
+            "dateFrom":{
+                "properties":{
+                    "date_from":{
+                        "type":"string"
+                    }
+                }
+            },
+            "dateTo":{
+                "properties":{
+                    "date_to":{
+                        "type":"string"
+                    }
+                }
+            }
+        }
+    }
+}
