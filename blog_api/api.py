@@ -85,7 +85,7 @@ def last_login(public_id):
 
     if not user:
         return jsonify({"error":f"User with public id {public_id} not found!"}), 400
-    return jsonify({"last_loign":user.last_login,
+    return jsonify({"last_login":user.last_login,
                     "last_request":user.last_request})
 
 
@@ -94,6 +94,8 @@ def last_login(public_id):
 @token_required
 def post_create(decoded_token):
     request_data = request.get_json()
+    if not decoded_token['public_id'] or not request_data['title'] or not request_data['text']:
+        return jsonify({"error":"Not enough post info was given!"}), 400
     new_post = Post(user_public_id=decoded_token['public_id'], title=request_data['title'], text=request_data['text'], creation_date=datetime.datetime.now())
 
     db.session.add(new_post)
@@ -109,7 +111,7 @@ def post_like(decoded_token, id):
     try:
         db.session.add(new_like)
         db.session.commit()
-        return jsonify({"message":"ok"}), 201
+        return jsonify({"message":"ok"}), 200
     except IntegrityError:
         return jsonify({"error":f"User with public_id {decoded_token['public_id']} already liked post {id}"}), 400
 
@@ -120,7 +122,7 @@ def post_like(decoded_token, id):
 def post_unlike(decoded_token, id):
     unlike = Like.query.filter_by(user_public_id=decoded_token['public_id'], post_id=id).first()
     if not unlike:
-        return jsonify({"error":"User didn't like the post"})
+        return jsonify({"error":"User didn't like the post"}), 400
 
     db.session.delete(unlike)
     db.session.commit()

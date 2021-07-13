@@ -1,7 +1,13 @@
 import pytest
 import json
 
+
 def test_post_create(client, user_token, create_new_user):
+    """
+    GIVEN User jwt token
+    WHEN a User create new post
+    THEN check if new post is created
+    """
     mimetype = 'application/json'
     headers = {
         'Content-Type': mimetype,
@@ -15,4 +21,4 @@ def test_post_create(client, user_token, create_new_user):
     url = '/post/create'
     response = client.post(url, headers=headers, data=data)
     assert response.status_code == 201
-    assert response.get_json()['new_post_id']
+    assert 'new_post_id' in response.get_json()
