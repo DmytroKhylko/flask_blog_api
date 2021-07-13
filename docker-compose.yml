@@ -31,3 +31,4 @@ services:
       - "5000:5000"
     volumes:
       - .:/usr/src/api    
+    command: ["./wait-for-it.sh", "db:5432", "--", "./init.sh"]
