@@ -134,18 +134,13 @@ def post_analytics(decoded_token):
 
         likes = Like.query.filter(Like.date>=date_from, Like.date<=date_to).all()
         like_analiytics = {}
-        current_day = date_from + timedelta(days=1)
-        while current_day <= date_to:
-            current_day_dict = {}
-            for like in likes:
-                if like.date >= current_day - timedelta(days=1) and like.date <= current_day:
-                    if like.post_id in current_day_dict:
-                        current_day_dict[like.post_id] += 1
-                        continue
-                    current_day_dict[like.post_id] = 1
-            if len(current_day_dict) > 0:
-                like_analiytics[str((current_day - timedelta(days=1)).isoformat()) + " - " + current_day.isoformat()] = current_day_dict
-            current_day = current_day + timedelta(days=1)
+        for like in likes:
+            if like.date.isoformat()[:10] not in like_analiytics:
+                like_analiytics[like.date.isoformat()[:10]] = {}
+            if like.post_id not in like_analiytics[like.date.isoformat()[:10]]:
+                like_analiytics[like.date.isoformat()[:10]][like.post_id] = 1
+                continue
+            like_analiytics[like.date.isoformat()[:10]][like.post_id] += 1
 
         return jsonify(like_analiytics)
     except KeyError as e:
