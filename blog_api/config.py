@@ -1,10 +1,5 @@
 import os
 
-def normalize_url(db_url):
-    if db_url is not None:
-        return db_url.replace("postgres://", "postgresql+psycopg2://") 
-
-
 class Config:
     DEBUG = True
     TESTING = False
@@ -23,7 +18,7 @@ class DevelopmentConfig(Config):
     DB_PASS = os.getenv('DB_PASS')
     DB_PORT = os.getenv('DB_PORT')
     DB_NAME = os.getenv('DB_NAME')
-    SQLALCHEMY_DATABASE_URI = normalize_url(os.environ.get("DATABASE_URL", f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"))
+    SQLALCHEMY_DATABASE_URI = os.environ.get("DATABASE_URL", f"postgresql+psycopg2://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}")
 
 
 
