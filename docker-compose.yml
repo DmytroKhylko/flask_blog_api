@@ -23,6 +23,8 @@ services:
   python-flask:
     build: .
     restart: always
+    depends_on: 
+      - db
     env_file: 
       - .env
     ports:
