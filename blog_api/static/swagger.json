@@ -79,6 +79,11 @@
                 "tags": [
                     "User Request"
                 ],
+                "security": [
+                    {
+                    "bearerAuth":[]
+                    }
+                ],
                 "summary": "Get activity for user by public ID",
                 "parameters": [
                     {
@@ -218,11 +223,16 @@
             }
         }
         ,
-        "/post/{id}/analytics":{
+        "/post/analytics":{
             "get": {
-                "summary": "Get post like analytics by ID",
+                "summary": "Get posts analytics agregated by day",
                 "tags": [
                     "Blog Post Request"
+                ],
+                "security": [
+                    {
+                    "bearerAuth":[]
+                    }
                 ],
                 "parameters": [
                     {
@@ -246,7 +256,27 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "ok"
+                        "description": "ok",
+                        "content": {
+                            "application/json":{
+                                "schema":{
+                                    "$ref":"#/components/schemas/postAnalytics"
+                                },
+                                "examples":{
+                                    "example":{
+                                        "2021-07-13T00:00:00 - 2021-07-14T00:00:00":{
+                                            "1":11,
+                                            "2":100
+                                        },
+                                        "2021-07-14T00:00:00 - 2021-07-15T00:00:00":{
+                                            "1":55,
+                                            "2":150,
+                                            "3":10
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     },
                     "400": {
                         "description": "Failed. Incorrect data"
@@ -318,6 +348,21 @@
                 "properties":{
                     "new_post_id":{
                         "type":"string"
+                    }
+                }
+            },
+            "postAnalytics":{
+                "properties":{
+                    "date_from_date_to":{
+                        "type":"object",
+                        "properties":{
+                            "id":{
+                                "type":"string"
+                            },
+                            "like_count":{
+                                "type":"integer"
+                            }
+                        }
                     }
                 }
             },

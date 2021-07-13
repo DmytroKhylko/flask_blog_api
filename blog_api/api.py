@@ -1,5 +1,5 @@
 from functools import wraps
-import datetime
+from datetime import datetime, timedelta
 import jwt
 from jwt.exceptions import InvalidSignatureError
 from jwt.exceptions import ExpiredSignatureError
@@ -9,7 +9,7 @@ from flask import current_app
 from flask import Blueprint
 
 from sqlalchemy.exc import IntegrityError
-
+from sqlalchemy import func
 from blog_api.models.db import db
 from blog_api.models.user_model import User
 from blog_api.models.post_model import Post, Like
@@ -76,7 +76,8 @@ def login():
 
 
 @bp.route("/user/<public_id>/last-activity", methods=("GET",))
-def last_login(public_id):
+@token_required
+def last_login(decoded_token, public_id):
     
     user = User.query.filter_by(public_id=public_id).first()
 
@@ -92,7 +93,7 @@ def post_create(decoded_token):
     request_data = request.get_json()
     if not decoded_token['public_id'] or not request_data['title'] or not request_data['text']:
         return jsonify({"error":"Not enough post info was given!"}), 400
-    new_post = Post(user_public_id=decoded_token['public_id'], title=request_data['title'], text=request_data['text'], creation_date=datetime.datetime.now())
+    new_post = Post(user_public_id=decoded_token['public_id'], title=request_data['title'], text=request_data['text'], creation_date=datetime.now())
 
     db.session.add(new_post)
     db.session.commit()
@@ -102,7 +103,7 @@ def post_create(decoded_token):
 @bp.route("post/<int:id>/like", methods=("PUT",))
 @token_required
 def post_like(decoded_token, id):
-    new_like = Like(user_public_id=decoded_token['public_id'], post_id=id, date=datetime.datetime.now())
+    new_like = Like(user_public_id=decoded_token['public_id'], post_id=id, date=datetime.now())
     try:
         db.session.add(new_like)
         db.session.commit()
@@ -124,18 +125,29 @@ def post_unlike(decoded_token, id):
 
 
 
-@bp.route("/post/<int:id>/analytics", methods=("GET",))
-def post_analytics(id):
+@bp.route("/post/analytics", methods=("GET",))
+@token_required
+def post_analytics(decoded_token):
     try:
-        date_from = datetime.datetime.fromisoformat(request.args['date_from'])
-        date_to = datetime.datetime.fromisoformat(request.args['date_to'])
-        post = Post.query.filter_by(id=id).first()
-        if post is None:
-            return jsonify({"error":f"Invalid post id! Post with id {id} doesn't exit!"}), 400
-        if post.creation_date > date_to:
-            return jsonify({"error":f"Invalid date_to param! Post with id {id} hasn't been created yet"})
-        likes = Like.query.filter(Like.id == id, Like.date>=date_from, Like.date<=date_to).count()
-        return jsonify({"like_count":likes})
+        date_from = datetime.fromisoformat(request.args['date_from'])
+        date_to = datetime.fromisoformat(request.args['date_to'])
+
+        likes = Like.query.filter(Like.date>=date_from, Like.date<=date_to).all()
+        like_analiytics = {}
+        current_day = date_from + timedelta(days=1)
+        while current_day <= date_to:
+            current_day_dict = {}
+            for like in likes:
+                if like.date >= current_day - timedelta(days=1) and like.date <= current_day:
+                    if like.post_id in current_day_dict:
+                        current_day_dict[like.post_id] += 1
+                        continue
+                    current_day_dict[like.post_id] = 1
+            if len(current_day_dict) > 0:
+                like_analiytics[str((current_day - timedelta(days=1)).isoformat()) + " - " + current_day.isoformat()] = current_day_dict
+            current_day = current_day + timedelta(days=1)
+
+        return jsonify(like_analiytics)
     except KeyError as e:
         return jsonify({"error":str(e)}), 400
     except ValueError as e:

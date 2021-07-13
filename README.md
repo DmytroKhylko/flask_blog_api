@@ -70,10 +70,12 @@ curl -X PUT \
 #### Get post like analitycs
 ```
 curl -X GET \
-  'http://localhost:5000/post/<post_id>/analytics?date_from=<ISOdate>&date_to=<ISOdate>' 
+  'http://localhost:5000/post/analytics?date_from=<ISOdate>&date_to=<ISOdate>' 
+    -H 'Authorization: Bearer <JWT token you've got after login'
   ```
 #### Get user activity info
 ```
 curl -X GET \
   'http://localhost:5000/user/<user_public_id>/last-activity'
+  -H 'Authorization: Bearer <JWT token you've got after login' \
 ```

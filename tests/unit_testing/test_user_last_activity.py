@@ -13,6 +13,7 @@ def test_user_last_activity(client, user_token, create_new_user):
     headers = {
         'Content-Type': mimetype,
         'Accept': mimetype,
+        'Authorization': 'Bearer '+ user_token
     }
 
     url = f'/user/{create_new_user.public_id}/last-activity'
@@ -22,7 +23,7 @@ def test_user_last_activity(client, user_token, create_new_user):
     assert "last_login" in response_data
     assert "last_request" in response_data
     assert response_data['last_login'] == None
-    assert response_data['last_request'] == None
+    assert response_data['last_request'] != None
 
 
     """
@@ -42,6 +43,13 @@ def test_user_last_activity(client, user_token, create_new_user):
     assert response.status_code == 200
     assert 'token' in response.get_json()
 
+    headers = {
+        'Content-Type': mimetype,
+        'Accept': mimetype,
+        'Authorization': 'Bearer '+ user_token
+    }
+
+
     url = f'/user/{create_new_user.public_id}/last-activity'
     response = client.get(url, headers=headers)
     response_data = response.get_json()
@@ -49,7 +57,7 @@ def test_user_last_activity(client, user_token, create_new_user):
     assert "last_login" in response_data
     assert "last_request" in response_data
     assert response_data['last_login'] != None
-    assert response_data['last_request'] == None
+    assert response_data['last_request'] != None
 
 
     """
@@ -75,6 +83,7 @@ def test_user_last_activity(client, user_token, create_new_user):
     headers = {
         'Content-Type': mimetype,
         'Accept': mimetype,
+        'Authorization': 'Bearer '+ user_token
     }
     url = f'/user/{create_new_user.public_id}/last-activity'
     response = client.get(url, headers=headers)
