@@ -9,7 +9,7 @@ from flask import current_app
 from flask import Blueprint
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy import func
+from sqlalchemy import func, select, cast, Date
 from blog_api.models.db import db
 from blog_api.models.user_model import User
 from blog_api.models.post_model import Post, Like
@@ -132,17 +132,20 @@ def post_analytics(decoded_token):
         date_from = datetime.fromisoformat(request.args['date_from'])
         date_to = datetime.fromisoformat(request.args['date_to'])
 
-        likes = Like.query.filter(Like.date>=date_from, Like.date<=date_to).all()
-        like_analiytics = {}
-        for like in likes:
-            if like.date.isoformat()[:10] not in like_analiytics:
-                like_analiytics[like.date.isoformat()[:10]] = {}
-            if like.post_id not in like_analiytics[like.date.isoformat()[:10]]:
-                like_analiytics[like.date.isoformat()[:10]][like.post_id] = 1
+        likes_analytics_query = select(cast(Like.date, Date), Like.post_id, func.count(Like.post_id))\
+            .filter(Like.date>=date_from, Like.date<=date_to)\
+            .group_by(Like.post_id, cast(Like.date, Date))\
+            .order_by(cast(Like.date, Date))
+        likes_analytics = db.session.execute(likes_analytics_query).all()
+        likes_analytics_dict = {}
+        for like_analiytics in likes_analytics:
+            if str(like_analiytics[0]) not in likes_analytics_dict.keys():
+                likes_analytics_dict[str(like_analiytics[0])] = [{"post_id": like_analiytics[1], "count": like_analiytics[2]}]
                 continue
-            like_analiytics[like.date.isoformat()[:10]][like.post_id] += 1
+            likes_analytics_dict[str(like_analiytics[0])].append({"post_id": like_analiytics[1], "count": like_analiytics[2]})
 
-        return jsonify(like_analiytics)
+        return jsonify(likes_analytics_dict)
+
     except KeyError as e:
         return jsonify({"error":str(e)}), 400
     except ValueError as e:

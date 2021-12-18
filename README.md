@@ -24,7 +24,7 @@ docker-compose up
 pytest
 ```
 #### Swagger docs are placed under ***/swagger*** API route if config is set to ***DevelopmentConfig***
-#### Migrations are automatically performed on each lounch 
+#### Migrations are automatically performed on each launch 
 #### To perform manual migrations in api top level directory run
 ```
 flask db migrate
