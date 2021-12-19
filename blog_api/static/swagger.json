@@ -356,7 +356,7 @@
                     "date":{
                         "type":"object",
                         "properties":{
-                            "id":{
+                            "post_id":{
                                 "type":"string"
                             },
                             "like_count":{

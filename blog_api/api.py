@@ -140,9 +140,9 @@ def post_analytics(decoded_token):
         likes_analytics_dict = {}
         for like_analiytics in likes_analytics:
             if str(like_analiytics[0]) not in likes_analytics_dict.keys():
-                likes_analytics_dict[str(like_analiytics[0])] = [{"post_id": like_analiytics[1], "count": like_analiytics[2]}]
+                likes_analytics_dict[str(like_analiytics[0])] = [{"post_id": like_analiytics[1], "like_count": like_analiytics[2]}]
                 continue
-            likes_analytics_dict[str(like_analiytics[0])].append({"post_id": like_analiytics[1], "count": like_analiytics[2]})
+            likes_analytics_dict[str(like_analiytics[0])].append({"post_id": like_analiytics[1], "like_count": like_analiytics[2]})
 
         return jsonify(likes_analytics_dict)
 
